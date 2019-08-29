@@ -100,10 +100,15 @@ func SqlRowToDoltRow(nbf *types.NomsBinFormat, r sql.Row, doltSchema schema.Sche
 	taggedVals := make(row.TaggedValues)
 	for i, val := range r {
 		if val != nil {
-			taggedVals[uint64(i)] = SqlValToNomsVal(val)
+			var err error
+			tag := doltSchema.GetAllCols().Tags[i]
+			schCol := doltSchema.GetAllCols().TagToCol[tag]
+			taggedVals[tag], err = SqlValToNomsVal(val, schCol.Kind)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-
 	return row.New(nbf, doltSchema, taggedVals)
 }
 

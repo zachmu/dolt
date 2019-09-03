@@ -421,6 +421,14 @@ func TestUpdate(t *testing.T) {
 			query:       `update people set name = null where id ='00000000-0000-0000-0000-000000000000'`,
 			expectedRes: 1,
 		},
+		//{
+		//	name:  "on duplicate update",
+		//	query: `insert into people (id, name, age, is_married) values
+		//		('00000000-0000-0000-0000-000000000000', 'Bill Billerson', 99, true)
+		//		ON DUPLICATE KEY UPDATE age=99`,
+		//	expectedIds: []uuid.UUID{uuid.MustParse("00000000-0000-0000-0000-000000000000")},
+		//	expectedAges: []uint{99},
+		//},
 	}
 
 	for _, test := range tests {

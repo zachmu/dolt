@@ -100,53 +100,52 @@ func (t *DoltTable) PartitionRows(ctx *sql.Context, _ sql.Partition) (sql.RowIte
 }
 
 // Insert adds the given row to the table and updates the database root.
-// Returns true if the row did not exist and was inserted successfully.
-func (t *DoltTable) Insert(ctx *sql.Context, sqlRow sql.Row) (bool, error) {
+func (t *DoltTable) Insert(ctx *sql.Context, sqlRow sql.Row) error {
 	dRow, err := SqlRowToDoltRow(t.table.Format(), sqlRow, t.sch)
 	if err != nil {
-		return false, err
+		return  err
 	}
 
 	taggedVals := row.TaggedValues{}
 	for _, pkTag := range t.sch.GetPKCols().Tags {
 		dCol, ok := dRow.GetColVal(pkTag)
 		if !ok {
-			return false, errors.New("error: primary key missing from values")
+			return errors.New("primary key missing from values")
 		}
 		dColVal, err := dCol.Value(ctx)
 		if err != nil {
-			return false, errhand.BuildDError("error: failed to read primary key value").AddCause(err).Build()
+			return errhand.BuildDError("failed to read primary key value").AddCause(err).Build()
 		}
 		taggedVals = taggedVals.Set(pkTag, dColVal)
 	}
 	_, rowExists, err := t.table.GetRowByPKVals(ctx, taggedVals, t.sch)
 	if err != nil {
-		return false, errhand.BuildDError("error: failed to read table").AddCause(err).Build()
+		return errhand.BuildDError("failed to read table").AddCause(err).Build()
 	}
 	if rowExists {
-		return false, nil
+		return errors.New("duplicate primary key given")
 	}
 
 	typesMap, err := t.table.GetRowData(ctx)
 	if err != nil {
-		return false, errhand.BuildDError("error: failed to get row data.").AddCause(err).Build()
+		return errhand.BuildDError("failed to get row data.").AddCause(err).Build()
 	}
 	mapEditor := typesMap.Edit()
 	updated, err := mapEditor.Set(dRow.NomsMapKey(t.sch), dRow.NomsMapValue(t.sch)).Map(ctx)
 	if err != nil {
-		return false, errhand.BuildDError("error: failed to modify table").AddCause(err).Build()
+		return errhand.BuildDError("failed to modify table").AddCause(err).Build()
 	}
 	newTable, err := t.table.UpdateRows(ctx, updated)
 	if err != nil {
-		return false, errhand.BuildDError("error: failed to update rows").AddCause(err).Build()
+		return errhand.BuildDError("failed to update rows").AddCause(err).Build()
 	}
 	newRoot, err := t.db.root.PutTable(ctx, t.db.root.VRW(), t.name, newTable)
 	if err != nil {
-		return false, errhand.BuildDError("error: failed to write table back to database").AddCause(err).Build()
+		return errhand.BuildDError("failed to write table back to database").AddCause(err).Build()
 	}
 	t.table = newTable
 	t.db.root = newRoot
-	return true, nil
+	return nil
 }
 
 // doltTablePartitionIter, an object that knows how to return the single partition exactly once.

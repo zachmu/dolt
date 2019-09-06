@@ -17,6 +17,7 @@ package sqle
 import (
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/google/uuid"
 	"github.com/src-d/go-mysql-server/sql"
@@ -88,11 +89,18 @@ func SqlValToNomsVal(val interface{}, kind types.NomsKind) (types.Value, error) 
 
 	switch kind {
 	case types.BoolKind:
-		e, ok := val.(bool)
-		if !ok {
+		switch e := val.(type) {
+		case bool:
+			return types.Bool(e), nil
+		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+			return types.Bool(e != 0), nil
+		case float32, float64:
+			return types.Bool(int(math.Round(e.(float64))) != 0), nil
+		case string:
+			return types.Bool(false), nil
+		default:
 			return nil, errors.New(fmt.Sprintf("Cannot convert SQL type <%T> val <%v> to bool", val, val))
 		}
-		return types.Bool(e), nil
 	case types.IntKind:
 		switch e := val.(type) {
 		case int:

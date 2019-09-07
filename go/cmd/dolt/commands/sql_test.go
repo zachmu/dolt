@@ -340,12 +340,12 @@ func TestInsert(t *testing.T) {
 				('00000000-0000-0000-0000-000000000000', 'Frank Frankerson', 10, false, 'Goon')`,
 			expectedRes: 1,
 		},
-		{
-			name: "insert ignore",
-			query: `insert ignore into people (id, name, age, is_married, title) values
-				('00000000-0000-0000-0000-000000000000', 'Frank Frankerson', 10, false, 'Goon')`,
-			expectedIds: []uuid.UUID{uuid.MustParse("00000000-0000-0000-0000-000000000000")},
-		},
+		//{
+		//	name: "insert ignore",
+		//	query: `insert ignore into people (id, name, age, is_married, title) values
+		//		('00000000-0000-0000-0000-000000000000', 'Frank Frankerson', 10, false, 'Goon')`,
+		//	expectedIds: []uuid.UUID{uuid.MustParse("00000000-0000-0000-0000-000000000000")},
+		//},
 	}
 
 	for _, test := range tests {

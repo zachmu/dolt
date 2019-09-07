@@ -53,7 +53,20 @@ func ExecuteSql(dEnv *env.DoltEnv, root *doltdb.RootValue, statements string) (*
 		case *sqlparser.Select, *sqlparser.OtherRead:
 			return nil, errors.New("Select statements aren't handled")
 		case *sqlparser.Insert:
-			_, execErr = dsql.ExecuteBatchInsert(context.Background(), root, s, batcher)
+			if root, err = batcher.Commit(context.Background()); err != nil {
+				return nil, err
+			}
+			db := dsqle.NewDatabase("dolt", root)
+			engine := sqle.NewDefault()
+			engine.AddDatabase(db)
+			ctx := sql.NewEmptyContext()
+			_, _, err := engine.Query(ctx, query)
+			if err != nil {
+				return nil, err
+			}
+			if err := batcher.UpdateRoot(db.Root()); err != nil {
+				return nil, err
+			}
 		case *sqlparser.DDL:
 			if root, err = batcher.Commit(context.Background()); err != nil {
 				return nil, err

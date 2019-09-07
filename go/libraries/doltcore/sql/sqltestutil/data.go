@@ -337,3 +337,10 @@ func CreateTestDatabase(dEnv *env.DoltEnv, t *testing.T) {
 	dtestutils.CreateTestTable(t, dEnv, EpisodesTableName, EpisodesTestSchema, AllEpsRows...)
 	dtestutils.CreateTestTable(t, dEnv, AppearancesTableName, AppearancesTestSchema, AllAppsRows...)
 }
+
+// Creates a test database without any data in it
+func CreateEmptyTestDatabase(dEnv *env.DoltEnv, t *testing.T) {
+	dtestutils.CreateTestTable(t, dEnv, PeopleTableName, PeopleTestSchema)
+	dtestutils.CreateTestTable(t, dEnv, EpisodesTableName, EpisodesTestSchema)
+	dtestutils.CreateTestTable(t, dEnv, AppearancesTableName, AppearancesTestSchema)
+}

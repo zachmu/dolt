@@ -55,6 +55,10 @@ func TestStrSet(t *testing.T) {
 	}
 }
 
+func TestStrSetEmptyJoin(t *testing.T) {
+	assert.Empty(t, NewEmptyStrSet().JoinStrings(","))
+}
+
 // tests Size(), ContainsAll, Contains(), and AsSlice()
 func isAsExpected(strSet *StrSet, expected []string) bool {
 	if strSet.Size() != len(expected) {

@@ -87,6 +87,10 @@ func TestUnique(t *testing.T) {
 	}
 }
 
+func TestUniqueEmpty(t *testing.T) {
+	assert.Empty(t, Unique(nil))
+}
+
 func TestIterateDifferent(t *testing.T) {
 	strSet1 := NewStrSet([]string{"a", "b", "c", "d"})
 	strSet2 := NewStrSet([]string{"e", "f", "g"})

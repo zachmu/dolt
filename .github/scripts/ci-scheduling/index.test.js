@@ -451,6 +451,7 @@ test('every PR workflow is registered and every test job depends on admission', 
       assert.match(job, /^    if:.*needs.ci-admission.outputs.run == 'true'/m, file);
     }
   }
+  assert.deepEqual(actual.sort(), ['.github/workflows/ci-pr-labels.yaml', '.github/workflows/ci-pr.yaml']);
   assert.deepEqual(actual.sort(), [...workflows].sort());
   const scheduler = readFileSync(join(dir, 'ci-scheduler.yaml'), 'utf8');
   for (const action of ['labeled', 'unlabeled', 'ready_for_review', 'converted_to_draft']) {
@@ -544,6 +545,13 @@ test('the 5am boundary is checked again immediately before release', async t => 
 
 test('a canceled run that never started admission cannot clear the barrier', async () => {
   const f = fixture({ runs: [{ ...run, conclusion: 'cancelled' }], jobs: [] });
+  await f.reconcile(night);
+  assert.equal(f.state.statuses[0].state, 'failure');
+  assert.equal(f.calls('runs.rerun').length, 0);
+});
+
+test('a successful run without the required admission job cannot clear the barrier', async () => {
+  const f = fixture({ jobs: [] });
   await f.reconcile(night);
   assert.equal(f.state.statuses[0].state, 'failure');
   assert.equal(f.calls('runs.rerun').length, 0);

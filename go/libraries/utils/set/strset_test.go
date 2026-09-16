@@ -119,4 +119,6 @@ func TestEquality(t *testing.T) {
 
 	strSet1.Remove("a")
 	assert.False(t, strSet1.Equals(strSet2))
+
+	assert.True(t, NewEmptyStrSet().Equals(NewStrSet(nil)))
 }
